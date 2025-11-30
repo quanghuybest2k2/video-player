@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Player - Trình xem video chuyên nghiệp</title>
+    <meta
+      name="description"
+      content="Trình phát video hiện đại với hỗ trợ phụ đề SRT và VTT đầy đủ tính năng"
+    />
+    <link rel="shortcut icon" href="./images/icon.png" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e293b 50%,
+          #334155 100%
+        );
+        background-attachment: fixed;
+      }
+
+      .glass-card {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+      }
+
+      .file-input-label {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        color: white;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      }
+
+      .file-input-label:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+      }
+
+      .file-input-label:active {
+        transform: translateY(0);
+      }
+
+      video {
+        width: 100%;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        background: #000;
+      }
+
+      video::cue {
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        font-size: 1.2em;
+        font-weight: 500;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+      }
+
+      .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(51, 65, 85, 0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+
+  <body class="p-4 md:p-8">
+    <div class="max-w-5xl mx-auto animate-fade-in">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="mb-3">🎬 Video Player Pro</h1>
+        <p class="text-white text-lg opacity-90 font-light">
+          Trình phát video chuyên nghiệp với hỗ trợ phụ đề
+        </p>
+      </div>
+
+      <!-- Main Card -->
+      <div class="glass-card rounded-3xl p-6 md:p-8 mb-6">
+        <!-- Upload Section -->
+        <div class="mb-8">
+          <h2
+            class="text-white text-xl font-semibold mb-4 flex items-center gap-2"
+          >
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              ></path>
+            </svg>
+            Tải lên tệp
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Video Upload -->
+            <div class="file-input-wrapper w-full">
+              <input id="videoFile" type="file" accept="video/*" />
+              <label
+                for="videoFile"
+                class="file-input-label w-full justify-center"
+              >
+                <svg
+                  class="icon"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <span>Chọn video</span>
+              </label>
+            </div>
+
+            <!-- Subtitle Upload -->
+            <div class="file-input-wrapper w-full">
+              <input id="subFile" type="file" accept=".srt,.vtt,text/vtt" />
+              <label
+                for="subFile"
+                class="file-input-label w-full justify-center"
+              >
+                <svg
+                  class="icon"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                  ></path>
+                </svg>
+                <span>Chọn phụ đề (.srt/.vtt)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- File Info Display -->
+          <div id="filesInfo" aria-live="polite" class="text-center">
+            <span class="info-badge">
+              <svg
+                class="icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              Chưa có video được chọn
+            </span>
+          </div>
+        </div>
+
+        <!-- Video Player -->
+        <div>
+          <video controls id="videoPlayer">
+            <source type="video/mp4" />
+            <track
+              id="subs"
+              label="Tiếng Việt"
+              kind="subtitles"
+              srclang="vi"
+              default
+            />
+            Trình duyệt của bạn không hỗ trợ video.
+          </video>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center text-white opacity-75 text-sm">
+        <p>@2025 Đoàn Quang Huy</p>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const video = document.getElementById("videoPlayer");
+        const sourceEl = video.querySelector("source");
+        const videoFileInput = document.getElementById("videoFile");
+        const subFileInput = document.getElementById("subFile");
+        const filesInfo = document.getElementById("filesInfo");
+
+        // Keep track of created blob URLs so we can revoke them
+        const createdUrls = [];
+        let createdTrack = null;
+
+        function revokeAll() {
+          createdUrls.forEach((u) => {
+            try {
+              URL.revokeObjectURL(u);
+            } catch (e) {}
+          });
+          createdUrls.length = 0;
+        }
+
+        function removeCreatedTrack() {
+          if (createdTrack && createdTrack.parentNode) {
+            createdTrack.parentNode.removeChild(createdTrack);
+            createdTrack = null;
+          }
+          revokeAll();
+        }
+
+        function updateFilesInfo(videoName, subName) {
+          let html = '<span class="info-badge">';
+          html +=
+            '<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
+          html +=
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+          html += "</svg>";
+
+          if (videoName && subName) {
+            html += `Video: ${videoName} • Phụ đề: ${subName}`;
+          } else if (videoName) {
+            html += `Video: ${videoName}`;
+          } else {
+            html += "Chưa có video được chọn";
+          }
+
+          html += "</span>";
+          filesInfo.innerHTML = html;
+        }
+
+        function attachVTTFromText(text, label = "Phụ đề") {
+          removeCreatedTrack();
+          // If looks like SRT (timestamps with commas), normalize to VTT
+          const hasVTTHeader = /^WEBVTT/m.test(text);
+          let vttText = text;
+          if (!hasVTTHeader) {
+            const normalized = text
+              .replace(/\r+/g, "")
+              .replace(/(\d{2}:\d{2}:\d{2}),(?=\d{3})/g, "$1.");
+            vttText = "WEBVTT\n\n" + normalized;
+          }
+          const blob = new Blob([vttText], { type: "text/vtt" });
+          const url = URL.createObjectURL(blob);
+          createdUrls.push(url);
+
+          const track = document.createElement("track");
+          track.kind = "subtitles";
+          track.label = label;
+          track.srclang = "vi";
+          track.src = url;
+          track.default = true;
+          video.appendChild(track);
+          createdTrack = track;
+
+          // Ensure track becomes active
+          setTimeout(() => {
+            const tt = Array.from(video.textTracks).find(
+              (t) => t.label === label || t.language === "vi"
+            );
+            if (tt) tt.mode = "showing";
+          }, 200);
+        }
+
+        let currentVideoName = null;
+        let currentSubName = null;
+
+        videoFileInput.addEventListener("change", (e) => {
+          const f = e.target.files && e.target.files[0];
+          if (!f) return;
+          // Revoke previously created video object URLs if any
+          if (sourceEl.src && sourceEl.src.startsWith("blob:")) {
+            try {
+              URL.revokeObjectURL(sourceEl.src);
+            } catch (e) {}
+          }
+          const vUrl = URL.createObjectURL(f);
+          sourceEl.src = vUrl;
+          video.load();
+          currentVideoName = f.name;
+          updateFilesInfo(currentVideoName, currentSubName);
+        });
+
+        subFileInput.addEventListener("change", (e) => {
+          const f = e.target.files && e.target.files[0];
+          if (!f) return;
+          currentSubName = f.name;
+          updateFilesInfo(currentVideoName, currentSubName);
+          const reader = new FileReader();
+          reader.onload = () => {
+            const text = reader.result;
+            attachVTTFromText(text, f.name || "Phụ đề");
+          };
+          reader.readAsText(f, "utf-8");
+        });
+
+        // Revoke blob URLs on page unload
+        window.addEventListener("unload", () => {
+          revokeAll();
+          if (sourceEl.src && sourceEl.src.startsWith("blob:")) {
+            try {
+              URL.revokeObjectURL(sourceEl.src);
+            } catch (e) {}
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
