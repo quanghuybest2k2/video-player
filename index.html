@@ -279,6 +279,22 @@
         const createdUrls = [];
         let createdTrack = null;
 
+        let needWarn = false;
+
+        // Merge change listeners to set warning flag
+        [videoFileInput, subFileInput].forEach((input) =>
+          input.addEventListener("change", () => {
+            if (input.files.length > 0) needWarn = true;
+          })
+        );
+
+        // show warning on page unload if files were selected
+        window.addEventListener("beforeunload", (e) => {
+          if (!needWarn) return;
+          e.preventDefault();
+          e.returnValue = "";
+        });
+
         function revokeAll() {
           createdUrls.forEach((u) => {
             try {
